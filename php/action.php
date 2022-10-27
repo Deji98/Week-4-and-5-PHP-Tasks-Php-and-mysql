@@ -1,3 +1,4 @@
+
 <?php
 include 'userauth.php';
 include_once '../config.php';
@@ -23,9 +24,6 @@ switch (true) {
         $password = $_POST['password'];
         resetPassword($email, $password);
         break;
-    case isset($_POST['logout']):
-        logout();
-        break;
     case isset($_POST['delete']):
         $id = $_POST['id'];
         deleteaccount($id);
@@ -34,3 +32,5 @@ switch (true) {
         getusers();
         break;
 }
+
+?>

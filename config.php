@@ -2,8 +2,7 @@
 
 function db()
 {
-    //set your configs here
-    $host = 'localhost';
+    $host = '127.0.0.1';
     $user = 'root';
     $db = 'zuriphp';
     $password = '';
@@ -11,5 +10,9 @@ function db()
     if (!$conn) {
         echo "<script> alert('Error connecting to the database') </script>";
     }
+    // else{
+
+    //     echo "connection was successful";
+    // }
     return $conn;
 }

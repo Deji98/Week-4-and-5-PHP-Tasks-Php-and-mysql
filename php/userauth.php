@@ -5,23 +5,25 @@ require_once '../config.php';
 //register users
 function registerUser($fullnames, $email, $password, $gender, $country)
 {
-    //create a connection variable using the db function in config.php
     $conn = db();
-    //check if user with this email already exist in the database
     if (
         mysqli_num_rows(
-            mysqli_query($conn, "SELECT * FROM Students WHERE emails='$email'")
+            mysqli_query(
+                $conn,
+                "SELECT email from students WHERE email='$email'"
+            )
         ) >= 1
     ) {
-        echo "<scriptt> alert('User Email Already Taken')</script>";
-        header('refresh: 0.5; url=../forms/register.php');
+        echo "<script> alert('User already exists')</script>";
+        header('refresh:1;url=../forms/login.html');
     } else {
-        $sql = "INSERT INTO `Students` (`full_names`,`country`, `email`, `gender`, `password`) VALUES ('$fullnames', '$country', '$email', '$gender', '$password')";
+        $sql = "INSERT INTO students(full_names,country,email,gender,`password`) VALUES ('$fullnames','$country','$email','$gender','$password')";
+
         if (mysqli_query($conn, $sql)) {
-            echo "<scriptt> alert('User Successfuly Created !!')</script>";
-            header('refresh: 2; url=../forms/login.php');
-        } else {
-            echo "<scriptt> alert('An Error Occured Please Try Again')</script>";
+            echo "<script> alert('User succesfully registered')</script>";
+            session_start();
+            $_SESSION['username'] = $email;
+            header('refresh:1; url=../dashboard.php');
         }
     }
 }
@@ -29,36 +31,35 @@ function registerUser($fullnames, $email, $password, $gender, $country)
 //login users
 function loginUser($email, $password)
 {
-    //create a connection variable using the db function in config.php
     $conn = db();
-    $query = "SELECT * FROM Students WHERE emails='$email' AND password='$password'";
+
+    $query = "SELECT * FROM students WHERE email='$email' AND password='$password'";
     $result = mysqli_query($conn, $query);
     if (mysqli_num_rows($result) >= 1) {
         session_start();
         $_SESSION['username'] = $email;
-        header('Location: ../dashboard.php');
+        header('location:../dashboard.php');
     } else {
-        header('Location: ../forms/login.php?message=invalid');
+        echo "<script>alert('Wrong email/Password')</script>";
+        header('refresh:2;url=../forms/login.html');
     }
 }
 
 function resetPassword($email, $password)
 {
-    //create a connection variable using the db function in config.php
     $conn = db();
-    if (
-        mysqli_num_rows(
-            mysqli_query($conn, "SELECT * FROM Students WHERE emails='$email'")
-        ) >= 1
-    ) {
-        $sql = "UPDATE ttable Students set password='$password' WHERE emails='$email'";
+    $query = " SELECT email FROM students WHERE email='$email'";
+    $result = mysqli_query($conn, $query);
+    if (mysqli_num_rows($result) >= 1) {
+        $sql = "UPDATE students set password='$password' where email='$email'";
         if (mysqli_query($conn, $sql)) {
-            echo "<scriptt> alert('Paaword Succesfully Updated!!')</script>";
+            echo 'Password changed sucessfully';
         } else {
-            echo "<scriptt> alert('An Error Occured Please Try Again')</script>";
+            echo "<script>alert('an error occured,try again')</script>";
         }
     } else {
-        echo 'an error occured';
+        echo "<script>alert('User does not exist')</script>";
+        header('refresh:2;url=../forms/login.html');
     }
 }
 
@@ -88,43 +89,35 @@ function getusers()
                 $data['gender'] .
                 "</td> <td style='width: 150px'>" .
                 $data['country'] .
-                "</td>
-                <form action='action.php' method='post'>
+                "</td> <td style='width: 150px'> 
+                <form action='action.php' method='POST'>
                 <input type='hidden' name='id'" .
                 'value=' .
                 $data['id'] .
                 '>' .
-                "<td style='width: 150px'> <button type='submit', name='delete'> DELETE </button>" .
+                "<button type='submit', name='delete'> DELETE </button></form></td>" .
                 '</tr>';
         }
         echo '</table></table></center></body></html>';
     }
-}
-
-function logout()
-{
-    if ($_SESSION['username']) {
-        session_unset();
-        session_destroy();
-        header('Location: ../index.php?messae=logout');
-    } else {
-        header('Location: ../forms/login.php');
-    }
+    //return users from the database
+    //loop through the users and display them on a table
 }
 
 function deleteaccount($id)
 {
     $conn = db();
-    //delete user with the given id from the database
     if (
         mysqli_num_rows(
-            mysqli_query($conn, "SELECT * FROM Students WHERE id='$id'")
-        )
+            mysqli_query($conn, "SELECT * FROM students WHERE id=$id")
+        ) >= 1
     ) {
-        $sql = "DELETE FROM Students WHERE id=$id";
+        $sql = "DELETE FROM students WHERE id='$id'";
         if (mysqli_query($conn, $sql)) {
-            echo "<scriptt> alert('DELETED')</script>";
-            header('refresh: 0.5; url=ACTION.php?ALL=');
+            echo "<script>alert('deleted sucessfully')</script><br>";
+            header('refresh:1;url=action.php?all=');
+        } else {
+            echo "<script>alert('error')</script>";
         }
     }
 }
